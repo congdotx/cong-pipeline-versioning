@@ -47,3 +47,8 @@ jobs:
         echo "Generated Version: $VERSION"
         echo "version_type=$VERSION_TYPE" >> $GITHUB_ENV
         echo "version=$VERSION" >> $GITHUB_ENV
+
+    - name: Tag the commit with the version
+      run: |
+        git tag ${{ env.version }}
+        git push origin ${{ env.version }}        
