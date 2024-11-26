@@ -1,0 +1,39 @@
+name: Cong - Pipeline versioning test
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  version_build:
+    runs-on: ubuntu-latest
+        
+    steps:     
+    - name: Generate Date-Based Version
+      id: version
+      run: |
+        # Get the current date in YYYYMMDD format
+        DATE=$(date +'%Y%m%d')
+        
+        # Get the branch name
+        BRANCH_NAME=${GITHUB_REF##*/}
+        
+        # Check if the branch is 'master' or not
+        if [ "$BRANCH_NAME" = "master" ] || [[ "$BRANCH_NAME" == hotfix* ]]; then
+          VERSION_TYPE="stable"
+          VERSION="${VERSION_TYPE}-${DATE}.${{ github.run_number }}"
+        elif [ "$BRANCH_NAME" = "develop" ]; then
+          VERSION_TYPE="beta"
+          VERSION="${VERSION_TYPE}-${DATE}.${{ github.run_number }}"
+        else
+          # Sanitize branch name to remove special characters
+          SAFE_BRANCH=$(echo "$BRANCH_NAME" | tr -cd '[:alnum:]-')
+          VERSION="${SAFE_BRANCH}-${GITHUB_SHA:0:7}"
+          VERSION_TYPE="pr"
+        fi
+        echo "Generated Version: $VERSION"
+        echo "Branch name: $BRANCH_NAME"
+        echo "version_type=$VERSION_TYPE" >> $GITHUB_ENV
+        echo "version=$VERSION" >> $GITHUB_ENV
