@@ -21,7 +21,7 @@ jobs:
         BRANCH_NAME=${GITHUB_REF##*/}
         
         # Check if the branch is 'master' or not
-        if [ "$BRANCH_NAME" = "master" ] || [[ "$BRANCH_NAME" == hotfix* ]]; then
+        if [ "$BRANCH_NAME" = "main" ] || [[ "$BRANCH_NAME" == hotfix* ]]; then
           VERSION_TYPE="stable"
           VERSION="${VERSION_TYPE}-${DATE}.${{ github.run_number }}"
         elif [ "$BRANCH_NAME" = "develop" ]; then
