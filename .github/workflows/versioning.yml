@@ -21,7 +21,7 @@ jobs:
     - name: Generate Date-Based Version
       id: version
       run: |
-        # Get the current date in YYYYMMDD format
+        # Get the date in YYYYMMDD format
         DATE=$(date +'%Y%m%d')
         YEAR=${DATE:0:4}  # First 4 characters (year)
         MONTH=${DATE:4:2} # Next 2 characters (month)
