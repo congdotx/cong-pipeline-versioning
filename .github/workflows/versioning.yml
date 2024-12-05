@@ -2,8 +2,13 @@ name: Cong - Pipeline versioning test
 
 on:
   workflow_dispatch:
+    inputs:
+      branchName:
+        description: "Branch name to run pipeline against"
+        required: true
+        default: "develop"
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "hotfix/*" ]
   pull_request:
     branches: [ "*" ]
 
@@ -30,6 +35,7 @@ jobs:
         SEMANTIC_VERSION="${YEAR}.${MONTH}.${DAY}.${GITHUB_RUN_NUMBER}"
         
         # Get the branch name
+        echo "github ref ${GITHUB_REF##*/}"
         BRANCH_NAME=${GITHUB_REF##*/}
         
         # Check if the ref is a pull request
