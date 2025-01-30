@@ -24,6 +24,11 @@ jobs:
       # with:
       #   token: ${{ secrets.GITHUB_TOKEN }}
 
+  
+    - name: Print event name
+      run: |          
+        echo "event_name: ${{ github.event_name }}"
+
     - name: Generate Date-Based Version
       id: version
       run: |
