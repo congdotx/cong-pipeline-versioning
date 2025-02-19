@@ -83,6 +83,8 @@ jobs:
     name: Create release
     needs: [build]
     if: needs.build.outputs.VERSION_TYPE == 'stable'
+    permissions: 
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Create release
