@@ -3,13 +3,13 @@ name: Create Release
 on:
   push:
     tags:
-      - '[0-9]{4}.[1-9]|1[0-2].[1-9]|[12][0-9]|3[01].[0-9]+'  # Matches YYYY.M.D.X
+      - '[0-9]*.[0-9]*.[0-9]*.[0-9]*'
 
 jobs:
   create-release:
     name: Create GitHub Release
+    if: ${{ github.ref_type == 'tag' && github.ref =~ 'refs/tags/[0-9]{4}.[0-9]{1,2}.[0-9]{1,2}.[0-9]+$' }} # Ensure stable release only (e.g. 2025.2.18.23)
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
