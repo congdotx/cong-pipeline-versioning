@@ -52,7 +52,7 @@ jobs:
         PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; /^refs\/pull/ { print $3 }')
 
         # Determine version type and base version
-        if [ "$BRANCH_NAME" = "main" ]
+        if [ "$BRANCH_NAME" = "main" ]; then
           VERSION_TYPE="stable"
         elif [[ "$BRANCH_NAME" == hotfix* ]]; then
           VERSION_TYPE="hotfix"
