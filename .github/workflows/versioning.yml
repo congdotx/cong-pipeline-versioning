@@ -23,7 +23,6 @@ jobs:
       uses: actions/checkout@v4
       # with:
       #   token: ${{ secrets.GITHUB_TOKEN }}
-
   
     - name: Print event name
       run: |          
@@ -34,50 +33,36 @@ jobs:
       run: |
         # Get the current date in YYYYMMDD format
         DATE=$(date +'%Y%m%d')
-        YEAR=${DATE:0:4}  # First 4 characters (year)
-        MONTH=${DATE:4:2} # Next 2 characters (month)
-        DAY=${DATE:6:2}   # Last 2 characters (day)
-        SEMANTIC_VERSION="${YEAR}.${MONTH}.${DAY}.${GITHUB_RUN_NUMBER}"
-        
+        YEAR=${DATE:0:4}          # Year: first 4 characters
+        MONTH=$((10#${DATE:4:2})) # Month: next 2 characters and remove leading zero from month (e.g. 05 -> 5)
+        DAY=$((10#${DATE:6:2}))   # Day: last 2 characters and remove leading zero from day (e.g. 09 -> 9)
+        VERSION="${YEAR}.${MONTH}.${DAY}.${GITHUB_RUN_NUMBER}"
+
         # Get the branch name
-        echo "github ref ${GITHUB_REF##*/}"
-        BRANCH_NAME=${GITHUB_REF##*/}
+        BRANCH_NAME='${{ steps.branch-names.outputs.current_branch }}'
         
         # Check if the ref is a pull request
         PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; /^refs\/pull/ { print $3 }')
 
         # Determine version type and base version
-        if [ "$BRANCH_NAME" = "master" ] || [ "$BRANCH_NAME" = "main" ] || [[ "$BRANCH_NAME" == hotfix* ]]; then
+        if [ "$BRANCH_NAME" = "main" ] || [[ "$BRANCH_NAME" == hotfix* ]]; then
           VERSION_TYPE="stable"
-          VERSION="${VERSION_TYPE}-${DATE}"
+        elif [[ "$BRANCH_NAME" == release/* ]]; then
+          VERSION_TYPE="rc"
         elif [ "$BRANCH_NAME" = "develop" ]; then
           VERSION_TYPE="beta"
-          VERSION="${VERSION_TYPE}-${DATE}"
-          SEMANTIC_VERSION="${SEMANTIC_VERSION}-${VERSION_TYPE}"
+          VERSION="${VERSION}-${VERSION_TYPE}"
         elif [ -n "$PR_NUMBER" ]; then
-          # If it's a pull request, prefix with "pr-" and include the PR number
           VERSION_TYPE="pr"
-          VERSION="${VERSION_TYPE}-${PR_NUMBER}"
-          SEMANTIC_VERSION="${SEMANTIC_VERSION}-${VERSION_TYPE}-${PR_NUMBER}"
+          VERSION="${VERSION}-${VERSION_TYPE}-${PR_NUMBER}"
         else
-          # Sanitize branch name to remove special characters
           SAFE_BRANCH=$(echo "$BRANCH_NAME" | tr -cd '[:alnum:]-')
-          VERSION="${SAFE_BRANCH}"
           VERSION_TYPE="branch"
-          SEMANTIC_VERSION="${SEMANTIC_VERSION}-${VERSION_TYPE}-${SAFE_BRANCH}"
+          VERSION="${VERSION}-${VERSION_TYPE}-${SAFE_BRANCH}"
         fi
-        
-        # Append GitHub run number to the version
-        VERSION="${VERSION}.${GITHUB_RUN_NUMBER}"
-
-        echo "version type:$VERSION_TYPE"
-        echo "Version: $VERSION"
-        echo "Semantic version: $SEMANTIC_VERSION"
-
         echo "version_type=$VERSION_TYPE" >> $GITHUB_ENV
         echo "version=$VERSION" >> $GITHUB_ENV
-        echo "semantic_version=$SEMANTIC_VERSION" >> $GITHUB_ENV
-
+        
     - name: Tag the commit with the version
       run: |
         git tag ${{ env.version }}
