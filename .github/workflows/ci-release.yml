@@ -1,14 +1,14 @@
 name: Create Release
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name used for the release"
 
 jobs:
   create-release:
     name: Create GitHub Release
-    if: ${{ github.ref_type == 'tag' && github.ref =~ 'refs/tags/[0-9]{4}.[0-9]{1,2}.[0-9]{1,2}.[0-9]+$' }} # Ensure stable release only (e.g. 2025.2.18.23)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -17,9 +17,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}  # Uses the pushed tag name
-          name: "Release ${{ github.ref_name }}"
-          body: "Automated release for version ${{ github.ref_name }}"
+          tag_name: ${{ inputs.tag_name }}  # Uses the pushed tag name
+          name: "Release ${{ inputs.tag_name }}"
+          body: "Automated release for version ${{ inputs.tag_name }}"
           draft: true  # Set to true if you want a draft release
           prerelease: false  # Set to true for pre-releases
         env:
