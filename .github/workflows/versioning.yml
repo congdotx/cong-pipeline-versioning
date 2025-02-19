@@ -47,7 +47,7 @@ jobs:
         # Determine version type and base version
         if [ "$BRANCH_NAME" = "main" ] || [[ "$BRANCH_NAME" == hotfix* ]]; then
           VERSION_TYPE="stable"
-        if [[ "$BRANCH_NAME" == release/* ]]; then
+        elif [[ "$BRANCH_NAME" == release/* ]]; then
           VERSION_TYPE="rc"
         elif [ "$BRANCH_NAME" = "develop" ]; then
           VERSION_TYPE="beta"
@@ -62,7 +62,7 @@ jobs:
         fi
         echo "version_type=$VERSION_TYPE" >> $GITHUB_ENV
         echo "version=$VERSION" >> $GITHUB_ENV
-
+        
     - name: Tag the commit with the version
       run: |
         git tag ${{ env.version }}
