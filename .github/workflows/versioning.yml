@@ -23,7 +23,6 @@ jobs:
       uses: actions/checkout@v4
       # with:
       #   token: ${{ secrets.GITHUB_TOKEN }}
-
   
     - name: Print event name
       run: |          
@@ -61,10 +60,6 @@ jobs:
           VERSION_TYPE="branch"
           VERSION="${VERSION}-${VERSION_TYPE}-${SAFE_BRANCH}"
         fi
-
-        echo "version type:$VERSION_TYPE"
-        echo "Version: $VERSION"
-
         echo "version_type=$VERSION_TYPE" >> $GITHUB_ENV
         echo "version=$VERSION" >> $GITHUB_ENV
 
