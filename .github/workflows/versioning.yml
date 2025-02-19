@@ -13,11 +13,14 @@ on:
     branches: [ "*" ]
 
 jobs:
-  version_build:
+  build:
     permissions:
         contents: write
     runs-on: ubuntu-latest
-        
+    outputs:
+      VERSION_TYPE: ${{ steps.version.outputs.version_type }}
+      VERSION: ${{ steps.version.outputs.version }}
+      BRANCH_NAME: ${{ steps.branch-names.outputs.current_branch }}        
     steps:     
     - name: Checkout branch
       uses: actions/checkout@v4
@@ -49,10 +52,14 @@ jobs:
         PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; /^refs\/pull/ { print $3 }')
 
         # Determine version type and base version
-        if [ "$BRANCH_NAME" = "main" ] || [[ "$BRANCH_NAME" == hotfix* ]]; then
+        if [ "$BRANCH_NAME" = "main" ]
           VERSION_TYPE="stable"
+        elif [[ "$BRANCH_NAME" == hotfix* ]]; then
+          VERSION_TYPE="hotfix"
+          VERSION="${VERSION}-${VERSION_TYPE}"
         elif [[ "$BRANCH_NAME" == release/* ]]; then
           VERSION_TYPE="rc"
+          VERSION="${VERSION}-${VERSION_TYPE}"
         elif [ "$BRANCH_NAME" = "develop" ]; then
           VERSION_TYPE="beta"
           VERSION="${VERSION}-${VERSION_TYPE}"
@@ -64,10 +71,26 @@ jobs:
           VERSION_TYPE="branch"
           VERSION="${VERSION}-${VERSION_TYPE}-${SAFE_BRANCH}"
         fi
-        echo "version_type=$VERSION_TYPE" >> $GITHUB_ENV
-        echo "version=$VERSION" >> $GITHUB_ENV
+        echo "VERSION_TYPE=$VERSION_TYPE" >> $GITHUB_OUTPUT
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         
     - name: Tag the commit with the version
       run: |
         git tag ${{ env.version }}
         git push origin ${{ env.version }}        
+
+  release:
+    name: Create release
+    needs: [build]
+    if: needs.build.outputs.VERSION_TYPE == "stable"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "${{ build.outputs.VERSION }}" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="Release ${{ build.outputs.VERSION }}" \
+              --generate-notes
