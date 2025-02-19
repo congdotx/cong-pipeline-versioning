@@ -82,7 +82,7 @@ jobs:
   release:
     name: Create release
     needs: [build]
-    if: needs.build.outputs.VERSION_TYPE == "stable"
+    if: needs.build.outputs.VERSION_TYPE == 'stable'
     runs-on: ubuntu-latest
     steps:
       - name: Create release
