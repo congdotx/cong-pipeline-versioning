@@ -90,7 +90,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
         run: |
-          gh release create "${{ build.outputs.VERSION }}" \
+          gh release create "${{ needs.build.outputs.VERSION }}" \
               --repo="$GITHUB_REPOSITORY" \
-              --title="Release ${{ build.outputs.VERSION }}" \
+              --title="Release ${{ needs.build.outputs.VERSION }}" \
               --generate-notes
