@@ -1,25 +1,19 @@
-name: Create Release
+name: Release Drafter
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: "Tag name used for the release"
+  push:
+    branches:
+      - main
 
 jobs:
-  create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
+  update_release_draft:
     permissions:
       contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
     steps:
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+      - uses: release-drafter/release-drafter@v6
         with:
-          tag_name: ${{ inputs.tag_name }}  # Uses the pushed tag name
-          name: "Release ${{ inputs.tag_name }}"
-          body: "Automated release for version ${{ inputs.tag_name }}"
-          draft: true  # Set to true if you want a draft release
-          prerelease: false  # Set to true for pre-releases
+          disable-autolabeler: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
