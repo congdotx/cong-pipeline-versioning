@@ -11,12 +11,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Get current date (one week ahead)
-        run: echo "BRANCH_NAME=release/$(date -d 'next week' +'%Y.%m.%d' | sed 's/0\([1-9]\)/\1/g')" >> $GITHUB_ENV
+        run: |    
+          DATE=$(date -d 'next week' +'%Y%m%d')
+          YEAR=${DATE:0:4}          # Year: first 4 characters
+          MONTH=$((10#${DATE:4:2})) # Month: next 2 characters and remove leading zero from month (e.g. 05 -> 5)
+          DAY=$((10#${DATE:6:2}))   # Day: last 2 characters and remove leading zero from day (e.g. 09 -> 9)
 
+          echo "BRANCH_NAME=release/${YEAR}.${MONTH}.${DAY}" >> $GITHUB_ENV
+          
       - name: Create new branch
         run: git checkout -b $BRANCH_NAME
 
