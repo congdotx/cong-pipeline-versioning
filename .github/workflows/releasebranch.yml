@@ -1,0 +1,22 @@
+name: Weekly release branch creation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current date (one week ahead)
+        run: echo "BRANCH_NAME=release/$(date -d 'next week' +'%Y.%m.%d' | sed 's/0\([1-9]\)/\1/g')" >> $GITHUB_ENV
+
+      - name: Create new branch
+        run: git checkout -b $BRANCH_NAME
+
+      - name: Push new branch
+        run: git push origin $BRANCH_NAME
